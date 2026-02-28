@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MailCraft</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f14;
+    --surface: #1a1a22;
+    --surface2: #22222e;
+    --surface3: #2a2a38;
+    --border: #35354a;
+    --border-lit: #5050708;
+    --border-strong: #50507a;
+    --text: #f4f1ee;
+    --text-muted: #9898aa;
+    --text-dim: #606075;
+    --accent: #8b7aff;
+    --accent2: #f26e50;
+    --accent-glow: rgba(139,122,255,0.15);
+    --accent2-glow: rgba(242,110,80,0.1);
+    --green: #4ade80;
+    --green-glow: rgba(74,222,128,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Epilogue', sans-serif;
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.6;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg-fx {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .bg-fx::before {
+    content: '';
+    position: absolute;
+    width: 800px; height: 800px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(124,106,247,0.06) 0%, transparent 65%);
+    top: -300px; left: -200px;
+    animation: floatA 20s ease-in-out infinite;
+  }
+  .bg-fx::after {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(242,110,80,0.05) 0%, transparent 65%);
+    bottom: -200px; right: -150px;
+    animation: floatB 25s ease-in-out infinite;
+  }
+  .bg-grid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image:
+      linear-gradient(rgba(124,106,247,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,106,247,0.025) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 20%, transparent 100%);
+  }
+  @keyframes floatA { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(80px,50px) scale(1.05)} }
+  @keyframes floatB { 0%,100%{transform:translate(0,0) scale(1)} 50%{transform:translate(-50px,-70px) scale(1.08)} }
+
+  /* ── LAYOUT ── */
+  .wrap {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 4rem 1.5rem 5rem;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    margin-bottom: 3.5rem;
+    animation: slideUp 0.7s ease both;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.8rem;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    background: var(--surface2);
+    border: 1px solid var(--border-lit);
+    border-radius: 100px;
+    padding: 0.35rem 1rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    box-shadow: 0 0 20px rgba(124,106,247,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
+  }
+
+  .badge-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: pulse 2s ease infinite;
+  }
+
+  .version-tag {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.62rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(0.85)} }
+
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 8vw, 4.4rem);
+    font-weight: 800;
+    line-height: 1.18;
+    letter-spacing: -0.03em;
+    color: var(--text);
+    margin-bottom: 1.2rem;
+  }
+
+  h1 .accent {
+    color: var(--accent);
+    position: relative;
+  }
+  h1 .accent::after {
+    content: '';
+    position: absolute;
+    bottom: 2px;
+    left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent), transparent);
+    border-radius: 2px;
+    opacity: 0.5;
+  }
+  h1 .italic {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent2);
+  }
+
+  .sub {
+    color: var(--text-muted);
+    font-size: 1rem;
+    font-weight: 300;
+    max-width: 460px;
+    line-height: 1.7;
+  }
+
+  .sub strong {
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Stats strip */
+  .stats-strip {
+    display: flex;
+    gap: 2rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+  }
+
+  .stat-val {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .stat-val span { color: var(--accent); }
+
+  .stat-lbl {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+  }
+
+  /* ── CARDS ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 1.8rem;
+    margin-bottom: 1rem;
+    transition: border-color 0.25s, box-shadow 0.25s;
+    animation: slideUp 0.6s ease both;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  }
+
+  .card:hover {
+    border-color: var(--border-strong);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+
+  .card:nth-child(2) { animation-delay: 0.1s; }
+  .card:nth-child(3) { animation-delay: 0.2s; }
+
+  .section-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+  }
+
+  .section-label .num {
+    background: linear-gradient(135deg, rgba(139,122,255,0.25), rgba(139,122,255,0.1));
+    border: 1px solid rgba(139,122,255,0.5);
+    border-radius: 7px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.6rem;
+    color: var(--accent);
+    font-weight: 800;
+  }
+
+  /* ── HERO CARD ── */
+  .hero-card {
+    border-color: rgba(139,122,255,0.5) !important;
+    background: linear-gradient(135deg, rgba(139,122,255,0.1) 0%, var(--surface) 55%);
+    box-shadow:
+      0 0 0 1px rgba(139,122,255,0.2),
+      0 12px 50px rgba(139,122,255,0.12),
+      inset 0 1px 0 rgba(139,122,255,0.15);
+    padding: 2.2rem;
+  }
+
+  .hero-label {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 1.1rem;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .hero-label-icon {
+    width: 28px; height: 28px;
+    background: var(--accent-glow);
+    border: 1px solid rgba(124,106,247,0.3);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+  }
+
+  .hero-textarea {
+    min-height: 150px !important;
+    font-size: 0.97rem !important;
+    background: rgba(255,255,255,0.06) !important;
+    border-color: rgba(139,122,255,0.4) !important;
+    border-radius: 14px !important;
+    padding: 1.1rem 1.2rem !important;
+    line-height: 1.7 !important;
+    color: #ffffff !important;
+  }
+
+  .hero-textarea:focus {
+    border-color: var(--accent) !important;
+    box-shadow: 0 0 0 4px rgba(139,122,255,0.15) !important;
+    background: rgba(139,122,255,0.07) !important;
+  }
+
+  /* ── TIPO BUTTONS ── */
+  .tipo-wrap {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.6rem;
+  }
+
+  .tipo-btn {
+    padding: 0.85rem 0.5rem;
+    border: 1px solid var(--border-strong);
+    border-radius: 14px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.7rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+    line-height: 1.3;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tipo-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-glow);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .tipo-btn:hover {
+    border-color: rgba(124,106,247,0.5);
+    color: var(--text);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  }
+
+  .tipo-btn:hover::before { opacity: 1; }
+
+  .tipo-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 6px 24px rgba(124,106,247,0.4);
+    transform: translateY(-2px);
+  }
+
+  .tipo-btn .em {
+    display: block;
+    font-size: 1.3rem;
+    margin-bottom: 0.3rem;
+    transition: transform 0.2s;
+  }
+
+  .tipo-btn:hover .em { transform: scale(1.15); }
+
+  /* ── FIELDS ── */
+  .row { display: grid; gap: 0.8rem; margin-bottom: 0.8rem; }
+  .row-2 { grid-template-columns: 1fr 1fr; }
+  .row-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .field { display: flex; flex-direction: column; gap: 0.35rem; }
+
+  .field label {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  input, select, textarea {
+    font-family: 'Epilogue', sans-serif;
+    font-size: 0.92rem;
+    background: var(--surface3);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    width: 100%;
+  }
+
+  input::placeholder, textarea::placeholder { color: var(--text-dim); }
+
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(139,122,255,0.15);
+    background: #2e2e3e;
+  }
+
+  input:not(:placeholder-shown), textarea:not(:placeholder-shown) {
+    border-color: rgba(139,122,255,0.4);
+    color: #ffffff;
+  }
+
+  select {
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b6b78' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 1rem center;
+    padding-right: 2.4rem;
+  }
+
+  select option { background: var(--surface2); }
+  textarea { resize: vertical; min-height: 95px; line-height: 1.6; }
+
+  .char-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.5rem;
+    padding: 0 0.2rem;
+  }
+
+  .char-hint {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .char-count {
+    font-family: 'Syne', monospace;
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    background: var(--surface3);
+    border: 1px solid var(--border-strong);
+    border-radius: 6px;
+    padding: 0.15rem 0.5rem;
+  }
+
+  /* ── GENERATE BUTTON ── */
+  .btn-gen {
+    width: 100%;
+    padding: 1.1rem 1.5rem;
+    background: linear-gradient(135deg, var(--accent) 0%, #6b59e8 100%);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    margin-top: 1.2rem;
+    box-shadow: 0 6px 28px rgba(124,106,247,0.35), 0 2px 8px rgba(124,106,247,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn-gen::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-gen:hover:not(:disabled)::before { left: 100%; }
+
+  .btn-gen:hover:not(:disabled) {
+    box-shadow: 0 10px 40px rgba(124,106,247,0.5), 0 4px 12px rgba(124,106,247,0.3);
+    transform: translateY(-2px);
+  }
+
+  .btn-gen:active:not(:disabled) { transform: translateY(0); }
+  .btn-gen:disabled {
+    background: var(--surface2);
+    color: var(--text-dim);
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* ── RESULT ── */
+  .result-card { display: none; }
+  .result-card.on { display: block; animation: slideUp 0.5s ease both; }
+
+  .result-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+
+  .result-badge {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+  }
+
+  .tag {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.25rem 0.7rem;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .tag.accent {
+    background: var(--accent-glow);
+    border-color: rgba(124,106,247,0.4);
+    color: var(--accent);
+  }
+
+  .btns-row { display: flex; gap: 0.5rem; }
+
+  .btn-ghost {
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    background: var(--surface2);
+    color: var(--text-muted);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.63rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-glow);
+  }
+
+  .btn-ghost.ok {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-glow);
+  }
+
+  /* ── SUBJECT BOX ── */
+  .subject-box {
+    background: var(--surface3);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 0.9rem 1.1rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    gap: 0.8rem;
+    align-items: flex-start;
+  }
+
+  .subj-lbl {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    flex-shrink: 0;
+    margin-top: 3px;
+    background: rgba(139,122,255,0.2);
+    border: 1px solid rgba(139,122,255,0.4);
+    border-radius: 5px;
+    padding: 0.15rem 0.45rem;
+  }
+
+  .subj-val {
+    font-size: 0.92rem;
+    color: #ffffff;
+    font-weight: 500;
+    line-height: 1.5;
+  }
+
+  /* ── EMAIL BODY ── */
+  .email-body {
+    background: var(--surface3);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 1.6rem;
+    font-size: 0.95rem;
+    line-height: 1.85;
+    white-space: pre-wrap;
+    color: #ffffff;
+    min-height: 160px;
+    font-family: 'Epilogue', sans-serif;
+    font-weight: 300;
+    position: relative;
+  }
+
+  .email-body::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 1.6rem; right: 1.6rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139,122,255,0.3), transparent);
+  }
+
+  /* ── LOADING ── */
+  .loading-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.2rem;
+    padding: 3.5rem;
+    color: var(--text-muted);
+  }
+
+  .loading-ring {
+    width: 40px; height: 40px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-txt {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+
+  .loading-dots {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .d {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: dotBounce 1.3s ease infinite;
+  }
+  .d:nth-child(2) { animation-delay: 0.15s; background: var(--accent2); }
+  .d:nth-child(3) { animation-delay: 0.3s; }
+
+  @keyframes dotBounce { 0%,80%,100%{transform:translateY(0);opacity:0.3} 40%{transform:translateY(-10px);opacity:1} }
+
+  .error-state {
+    padding: 2rem;
+    text-align: center;
+    color: var(--accent2);
+    font-size: 0.85rem;
+    background: rgba(242,110,80,0.05);
+    border-radius: 12px;
+    border: 1px solid rgba(242,110,80,0.15);
+  }
+
+  /* ── DIVIDER ── */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--border), transparent);
+    margin: 0.5rem 0 1.2rem;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(22px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 3rem;
+    text-align: center;
+    font-size: 0.68rem;
+    color: var(--text-dim);
+    font-family: 'Syne', sans-serif;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    animation: slideUp 0.6s 0.5s ease both;
+  }
+
+  .footer span { color: var(--accent); }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 560px) {
+    .tipo-wrap { grid-template-columns: repeat(2, 1fr); }
+    .row-2, .row-3 { grid-template-columns: 1fr; }
+    .stats-strip { gap: 1.2rem; }
+    h1 { font-size: 2rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-fx"></div>
+<div class="bg-grid"></div>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div class="badge"><span class="badge-dot"></span> AI Email Writer</div>
+      <span class="version-tag">v2.0</span>
+    </div>
+
+    <h1>Genera email<br>senza sembrare<br><span class="accent">un robot</span></h1>
+
+    <p class="sub">
+      Descrivi la situazione e ottieni una mail <strong>su misura per te</strong> — pronta da inviare, nel tuo stile, in secondi.
+    </p>
+
+    <div class="stats-strip">
+      <div class="stat">
+        <div class="stat-val">8<span>+</span></div>
+        <div class="stat-lbl">Tipi di email</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">5<span></div>
+        <div class="stat-lbl">Lingue</div>
+      </div>
+      <div class="stat">
+        <div class="stat-val">∞</div>
+        <div class="stat-lbl">Rigenera</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIPO -->
+  <div class="card">
+    <div class="section-label"><span class="num">01</span> Tipo di email</div>
+    <div class="tipo-wrap">
+      <button class="tipo-btn active" onclick="setTipo(this,'richiesta')"><span class="em">📋</span>Richiesta</button>
+      <button class="tipo-btn" onclick="setTipo(this,'followup')"><span class="em">🔄</span>Follow-up</button>
+      <button class="tipo-btn" onclick="setTipo(this,'ringraziamento')"><span class="em">🙏</span>Ringraziamento</button>
+      <button class="tipo-btn" onclick="setTipo(this,'reclamo')"><span class="em">⚠️</span>Reclamo</button>
+      <button class="tipo-btn" onclick="setTipo(this,'proposta')"><span class="em">💼</span>Proposta</button>
+      <button class="tipo-btn" onclick="setTipo(this,'scuse')"><span class="em">😔</span>Scuse</button>
+      <button class="tipo-btn" onclick="setTipo(this,'presentazione')"><span class="em">👋</span>Presentazione</button>
+      <button class="tipo-btn" onclick="setTipo(this,'declinare')"><span class="em">🚫</span>Declinare</button>
+    </div>
+  </div>
+
+  <!-- TEXTAREA HERO -->
+  <div class="card hero-card">
+    <div class="hero-label">
+      <div class="hero-label-icon">✏️</div>
+      Dimmi tutto — cosa vuoi comunicare?
+    </div>
+    <textarea id="contesto" class="hero-textarea" placeholder="Es. «Devo scrivere al mio capo per chiedere un giorno di ferie venerdì, ma ho già preso 3 giorni questo mese e non so come dirlo senza sembrare sfacciato…»" oninput="onType(this)"></textarea>
+    <div class="char-row">
+      <span class="char-hint">💡 Più dettagli dai → più l'email viene naturale</span>
+      <span class="char-count" id="cc">0 / 600</span>
+    </div>
+  </div>
+
+  <!-- DETTAGLI -->
+  <div class="card">
+    <div class="section-label"><span class="num">02</span> Qualche dettaglio in più</div>
+
+    <div class="row row-2">
+      <div class="field">
+        <label>Chi sei tu?</label>
+        <input type="text" id="mittente" placeholder="Es. Luca, Startup XYZ">
+      </div>
+      <div class="field">
+        <label>A chi scrivi?</label>
+        <input type="text" id="destinatario" placeholder="Es. Marco, il cliente">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="row row-3">
+      <div class="field">
+        <label>Tono</label>
+        <select id="tono">
+          <option value="amichevole e diretto">Amichevole</option>
+          <option value="professionale ma umano" selected>Professionale</option>
+          <option value="informale e rilassato">Informale</option>
+          <option value="deciso e diretto">Deciso</option>
+          <option value="empatico e comprensivo">Empatico</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Lingua</label>
+        <select id="lingua">
+          <option value="italiano" selected>🇮🇹 Italiano</option>
+          <option value="inglese">🇬🇧 Inglese</option>
+          <option value="spagnolo">🇪🇸 Spagnolo</option>
+          <option value="francese">🇫🇷 Francese</option>
+          <option value="tedesco">🇩🇪 Tedesco</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Lunghezza</label>
+        <select id="lunghezza">
+          <option value="breve e concisa">Breve</option>
+          <option value="media" selected>Media</option>
+          <option value="dettagliata">Dettagliata</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn-gen" id="genBtn" onclick="go()">
+      ✦ &nbsp;Genera la mia email
+    </button>
+  </div>
+
+  <!-- RISULTATO -->
+  <div class="card result-card" id="resultCard">
+    <div class="section-label"><span class="num">03</span> Ecco la tua email</div>
+
+    <div class="result-top">
+      <div class="result-badge" id="resultBadge"></div>
+      <div class="btns-row">
+        <button class="btn-ghost" id="copyBtn" onclick="copyAll()">⌘ Copia</button>
+        <button class="btn-ghost" onclick="go()">↺ Rigenera</button>
+      </div>
+    </div>
+
+    <div id="outputArea"></div>
+  </div>
+
+  <div class="footer">Powered by <span>Claude AI</span> · MailCraft v2.0</div>
+
+</div>
+
+<script>
+const API_KEY = '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';
+let tipo = 'richiesta';
+
+function setTipo(btn, t) {
+  document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  tipo = t;
+}
+
+function onType(el) {
+  if (el.value.length > 600) el.value = el.value.slice(0, 600);
+  document.getElementById('cc').textContent = el.value.length + ' / 600';
+}
+
+async function go() {
+  const contesto = document.getElementById('contesto').value.trim();
+  if (!contesto) {
+    const ta = document.getElementById('contesto');
+    ta.style.borderColor = '#f26e50';
+    ta.style.boxShadow = '0 0 0 4px rgba(242,110,80,0.1)';
+    ta.focus();
+    setTimeout(() => { ta.style.borderColor = ''; ta.style.boxShadow = ''; }, 2000);
+    return;
+  }
+
+  const mittente  = document.getElementById('mittente').value.trim();
+  const dest      = document.getElementById('destinatario').value.trim();
+  const tono      = document.getElementById('tono').value;
+  const lingua    = document.getElementById('lingua').value;
+  const lunghezza = document.getElementById('lunghezza').value;
+
+  const btn = document.getElementById('genBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="loading-ring" style="width:18px;height:18px;margin-right:8px"></div> Sto scrivendo…';
+
+  const card = document.getElementById('resultCard');
+  card.classList.add('on');
+  document.getElementById('outputArea').innerHTML = `
+    <div class="loading-state">
+      <div class="loading-ring"></div>
+      <div class="loading-dots"><div class="d"></div><div class="d"></div><div class="d"></div></div>
+      <div class="loading-txt">Sto scrivendo la tua email…</div>
+    </div>`;
+
+  const prompt = `Sei una persona reale che aiuta a scrivere email. Il tuo obiettivo è scrivere un'email che suoni completamente umana, naturale e autentica — NON come un testo generato da un AI.
+
+REGOLE FONDAMENTALI:
+- Scrivi come scriverebbe una persona vera, non un ufficio comunicazione
+- Usa un linguaggio normale, quello di tutti i giorni (non "Mi pregio di comunicarle", non "Spett.le", non "Con la presente", non "In virtù di quanto sopra")
+- Frasi corte. Nessun gergo corporativo. Nessuna frase pomposa.
+- Va bene una piccola imperfezione stilistica, rende tutto più umano
+- Il tono deve essere ${tono}
+- Lunghezza: ${lunghezza}
+- Lingua: ${lingua}
+- Tipo di email: ${tipo}
+${mittente ? `- Chi scrive: ${mittente}` : ''}
+${dest ? `- A chi è diretta: ${dest}` : ''}
+
+CONTESTO / COSA COMUNICARE:
+${contesto}
+
+Esempi di aperture CATTIVE (non usare):
+❌ "Egregio/Spettabile..."
+❌ "Mi permetto di contattarla per..."
+❌ "Con la presente sono a comunicarle..."
+❌ "In risposta alla sua gentile..."
+
+Esempi di aperture BUONE:
+✅ "Ciao Marco,"
+✅ "Salve,"
+✅ "Buongiorno,"
+✅ "Hey [nome]," (solo se tono informale)
+
+Rispondi SOLO con JSON valido, nessun testo fuori:
+{"oggetto":"...","corpo":"..."}
+
+Il corpo deve essere l'email completa e pronta da inviare.`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-api-key": API_KEY,
+        "anthropic-version": "2023-06-01",
+        "anthropic-dangerous-direct-browser-access": "true"
+      },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        messages: [{ role: "user", content: prompt }]
+      })
+    });
+
+    if (!res.ok) throw new Error(`Errore API (${res.status})`);
+
+    const data = await res.json();
+    const raw = data.content.map(i => i.text || '').join('').trim();
+    const m = raw.match(/\{[\s\S]*\}/);
+    if (!m) throw new Error('Risposta non valida');
+    const parsed = JSON.parse(m[0]);
+
+    const tipoLabel = { richiesta:'Richiesta', followup:'Follow-up', ringraziamento:'Ringraziamento', reclamo:'Reclamo', proposta:'Proposta', scuse:'Scuse', presentazione:'Presentazione', declinare:'Declino' };
+    document.getElementById('resultBadge').innerHTML = `
+      <span class="tag accent">${tipoLabel[tipo]}</span>
+      <span class="tag">${tono.split(' ')[0]}</span>
+      <span class="tag">${lingua.replace(/.*\s/, '')}</span>`;
+
+    document.getElementById('outputArea').innerHTML = `
+      <div class="subject-box">
+        <span class="subj-lbl">Oggetto</span>
+        <span class="subj-val" id="sbjTxt">${esc(parsed.oggetto)}</span>
+      </div>
+      <div class="email-body" id="emailTxt">${esc(parsed.corpo)}</div>`;
+
+    const cb = document.getElementById('copyBtn');
+    cb.textContent = '⌘ Copia';
+    cb.classList.remove('ok');
+
+    card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  } catch(e) {
+    document.getElementById('outputArea').innerHTML = `<div class="error-state">⚠️ ${esc(e.message)}<br><small style="opacity:0.6;margin-top:0.4rem;display:block">Controlla la tua API key e riprova</small></div>`;
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '✦ &nbsp;Genera la mia email';
+}
+
+function copyAll() {
+  const s = document.getElementById('sbjTxt');
+  const b = document.getElementById('emailTxt');
+  if (!b) return;
+  navigator.clipboard.writeText((s ? `Oggetto: ${s.textContent}\n\n` : '') + b.textContent).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = '✓ Copiato!';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '⌘ Copia'; btn.classList.remove('ok'); }, 2500);
+  });
+}
+
+function esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
